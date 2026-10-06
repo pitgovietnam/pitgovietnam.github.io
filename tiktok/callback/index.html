@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>PITGO – Kết nối TikTok</title>
+<style>
+body{font-family:system-ui,Arial,sans-serif;max-width:760px;margin:0 auto;padding:24px 16px;line-height:1.6;color:#222;background:#fff}
+code,textarea{font-family:ui-monospace,Consolas,monospace}
+textarea{width:100%;box-sizing:border-box;height:110px;font-size:14px;padding:8px}
+button{font-size:16px;padding:8px 16px;margin-top:8px;cursor:pointer}
+.ok{color:#0a7a3b}.err{color:#b00020}
+</style>
+</head><body>
+<h1>PITGO – Kết nối TikTok</h1>
+<div id="out">Đang đọc mã…</div>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var code = q.get("code"), err = q.get("error"), out = document.getElementById("out");
+  // Mã chỉ hiển thị trên máy bạn: trang này không gửi dữ liệu đi đâu.
+  if (err) {
+    out.innerHTML = '<p class="err">TikTok báo lỗi: <b></b></p><p></p>';
+    out.querySelector("b").textContent = err;
+    out.querySelectorAll("p")[1].textContent = q.get("error_description") || "";
+    return;
+  }
+  if (!code) { out.innerHTML = "<p>Không có mã. Hãy mở link đăng nhập do lệnh <code>tt-auth-url</code> tạo ra.</p>"; return; }
+  var cmd = "python3 ~/.openclaw/workspace-pitgo-social/tools/pitgo_social.py tt-auth-code '" + code.replace(/'/g, "'\\''") + "'";
+  out.innerHTML = '<p class="ok">✅ Đã nhận mã từ TikTok. Mã chỉ dùng được vài phút.</p>' +
+    '<p>Copy lệnh dưới đây và chạy ngay trên server PITGO:</p>' +
+    '<textarea readonly id="cmd"></textarea><br><button id="copy">Copy lệnh</button> <span id="msg"></span>';
+  var ta = document.getElementById("cmd"); ta.value = cmd;
+  document.getElementById("copy").onclick = function () {
+    ta.select();
+    var done = function () { document.getElementById("msg").textContent = "Đã copy."; };
+    if (navigator.clipboard) navigator.clipboard.writeText(cmd).then(done, function () { document.execCommand("copy"); done(); });
+    else { document.execCommand("copy"); done(); }
+  };
+})();
+</script>
+</body></html>
